@@ -13,12 +13,13 @@ def obtener_usuarios():
     try:
         cone = get_conexion()
         cursor = cone.cursor()
-        cursor.execute("SELECT id_usuario, nombre_completo, correo, contrasenna, direccion, telefono, rol from USUARIO")
+        cursor.execute("SELECT id_usuario, nombre, apellido, correo, contrasenna, direccion, telefono, rol from USUARIO")
         usuarios = []
-        for id_usuario, nombre_completo, correo, contrasenna, direccion, telefono, rol in cursor:
+        for id_usuario, nombre, apellido, correo, contrasenna, direccion, telefono, rol in cursor:
             usuarios.append({
                 "id_usuario": id_usuario,
-                "nombre_completo": nombre_completo,
+                "nombre": nombre,
+                "apellido": apellido,
                 "correo": correo,
                 "contrasenna":contrasenna,
                 "direccion":direccion,
@@ -36,7 +37,7 @@ def obtener_usuario(id_buscar: int):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
-        cursor.execute("SELECT nombre_completo, correo, contrasenna, direccion, telefono, rol FROM usuario WHERE id_usuario = :id_usuario"
+        cursor.execute("SELECT nombre, apellido, correo, contrasenna, direccion, telefono, rol FROM usuario WHERE id_usuario = :id_usuario"
                        ,{"id_usuario": id_buscar})
         usuario = cursor.fetchone()
         cursor.close()
@@ -45,25 +46,26 @@ def obtener_usuario(id_buscar: int):
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
         return {
             "id_usuario": id_buscar,
-            "nombre_completo": usuario[0],
-            "correo": usuario[1],
-            "contrasenna": usuario[2],
-            "direccion": usuario[3],
-            "telefono": usuario[4],
-            "rol": usuario[5]
+            "nombre": usuario[0],
+            "apellido": usuario[1],
+            "correo": usuario[2],
+            "contrasenna": usuario[3],
+            "direccion": usuario[4],
+            "telefono": usuario[5],
+            "rol": usuario[6]
         }
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
 @router.post("/")
-def agregar_usuario(id_usuario:str, nombre_completo:str, correo:str, contrasenna:str, direccion:str, telefono:str, rol:str):
+def agregar_usuario(id_usuario:str, nombre:str, apellido:str, correo:str, contrasenna:str, direccion:str, telefono:int, rol:str):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
         cursor.execute("""
             INSERT INTO usuario 
-            VALUES(:id_usuario, :nombre_completo, :correo, :contrasenia, :direccion, :telefono, :rol)
-        """,{"id_usuario":id_usuario, "nombre_completo":nombre_completo, "correo":correo, "contrasenna":contrasenna, "direccion":direccion,"telefono":telefono, "rol":rol})
+            VALUES(:id_usuario, :nombre, :apellido, :correo, :contrasenna, :direccion, :telefono, :rol)
+        """,{"id_usuario":id_usuario, "nombre":nombre, "apellido":apellido,"correo":correo, "contrasenna":contrasenna, "direccion":direccion,"telefono":telefono, "rol":rol})
         cone.commit()
         cursor.close()
         cone.close()
@@ -72,15 +74,15 @@ def agregar_usuario(id_usuario:str, nombre_completo:str, correo:str, contrasenna
         raise HTTPException(status_code=500, detail=str(ex))
 
 @router.put("/{id_actualizar}")
-def actualizar_usuario(id_actualizar:str, nombre_completo:str, correo:str, contrasenna:str, direccion:str, telefono:str, rol:int):
+def actualizar_usuario(id_actualizar:str, nombre:str, apellido:str, correo:str, contrasenna:str, direccion:str, telefono:int, rol:int):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
         cursor.execute ("""
                 UPDATE usuario
-                SET nombre_completo = :nombre, correo = :correo, contrasenna = :contrasenna, direccion = :direccion, telefono = :telefono, rol = :rol
+                SET nombre = :nombre, apellido = :apellido, correo = :correo, contrasenna = :contrasenna, direccion = :direccion, telefono = :telefono, rol = :rol
                 WHERE id_usuario = :id_usuario
-        """ , {"nombre_completo":nombre_completo, "correo":correo, "contrasenna":contrasenna, "direccion" :direccion, "telefono":telefono, "rol":rol, "id_usuario":id_actualizar})
+        """ , {"nombre":nombre, "apellido":apellido, "correo":correo, "contrasenna":contrasenna, "direccion" :direccion, "telefono":telefono, "rol":rol, "id_usuario":id_actualizar})
         if cursor.rowcount==0:
             cursor.close()
             cone.close()
@@ -114,23 +116,26 @@ def eliminar_usuario(id_eliminar: str):
 from typing import Optional
 
 @router.patch("/{id_actualizar}")
-def actualizar_parcial(id_actualizar:str, nombre_completo:Optional[str]=None, correo:Optional[str]=None, contrasenia:Optional[str]=None, direccion:Optional[str]=None, telefono:Optional[str]=None, rol:Optional[str]=None):
+def actualizar_parcial(id_actualizar:str, nombre:Optional[str]=None, apellido:Optional[str]=None, correo:Optional[str]=None, contrasenia:Optional[str]=None, direccion:Optional[str]=None, telefono:Optional[int]=None, rol:Optional[str]=None):
     try:
-        if not nombre_completo and not correo:
+        if not any([nombre, apellido, correo, contrasenia, direccion, telefono, rol]):
             raise HTTPException(status_code=400, detail="Debe enviar al menos 1 dato")
         cone = get_conexion()
         cursor = cone.cursor()
 
         campos = []
         valores = {"id_usuario": id_actualizar}
-        if nombre_completo:
-            campos.append("nombre_completo = :nombre")
-            valores["nombre_completo"] = nombre_completo
+        if nombre:
+            campos.append("nombre = :nombre")
+            valores["nombre"] = nombre
+        if apellido:
+            campos.append("apellido = :apellido")
+            valores["apellido"] = apellido  
         if correo:
             campos.append("correo = :correo")
             valores["correo"] = correo
         if contrasenia:
-            campos.append("contrasenna = :contrasenia")
+            campos.append("contrasenna = :contrasenna")
             valores["contrasenna"]= contrasenia
         if direccion:
             campos.append("direccion = :direccion")
