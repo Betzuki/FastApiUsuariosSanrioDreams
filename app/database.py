@@ -7,3 +7,4 @@ def get_conexion():
         dsn="localhost:1521/XE"
     )
     return conexion
+

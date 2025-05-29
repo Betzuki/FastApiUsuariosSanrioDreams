@@ -74,7 +74,7 @@ def agregar_usuario(id_usuario:str, nombre:str, apellido:str, correo:str, contra
         raise HTTPException(status_code=500, detail=str(ex))
 
 @router.put("/{id_actualizar}")
-def actualizar_usuario(id_actualizar:str, nombre:str, apellido:str, correo:str, contrasenna:str, direccion:str, telefono:int, rol:int):
+def actualizar_usuario(id_actualizar:str, nombre:str, apellido:str, correo:str, contrasenna:str, direccion:str, telefono:int, rol:str):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
