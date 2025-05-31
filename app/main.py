@@ -1,3 +1,4 @@
+# app/main.py
 from fastapi import FastAPI
 from app.routers import usuarios
 
@@ -6,7 +7,6 @@ app = FastAPI(
     version="1.0.0",
     description="API para gestionar usuarios usando FastAPI y Oracle"
 )
-
 
 app.include_router(usuarios.router)
 
