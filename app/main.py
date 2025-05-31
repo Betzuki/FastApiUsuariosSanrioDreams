@@ -9,3 +9,7 @@ app = FastAPI(
 
 
 app.include_router(usuarios.router)
+
+@app.get("/")
+def root():
+    return {"mensaje": "API Sanrio Dreams funcionando 🚀"}

@@ -33,7 +33,7 @@ def obtener_usuarios():
         raise HTTPException(status_code=500, detail=str(ex))
 
 @router.get("/{id_buscar}")
-def obtener_usuario(id_buscar: int):
+def obtener_usuario(id_buscar: str):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
@@ -116,9 +116,9 @@ def eliminar_usuario(id_eliminar: str):
 from typing import Optional
 
 @router.patch("/{id_actualizar}")
-def actualizar_parcial(id_actualizar:str, nombre:Optional[str]=None, apellido:Optional[str]=None, correo:Optional[str]=None, contrasenia:Optional[str]=None, direccion:Optional[str]=None, telefono:Optional[int]=None, rol:Optional[str]=None):
+def actualizar_parcial(id_actualizar:str, nombre:Optional[str]=None, apellido:Optional[str]=None, correo:Optional[str]=None, contrasenna:Optional[str]=None, direccion:Optional[str]=None, telefono:Optional[int]=None, rol:Optional[str]=None):
     try:
-        if not any([nombre, apellido, correo, contrasenia, direccion, telefono, rol]):
+        if not any([nombre, apellido, correo, contrasenna, direccion, telefono, rol]):
             raise HTTPException(status_code=400, detail="Debe enviar al menos 1 dato")
         cone = get_conexion()
         cursor = cone.cursor()
@@ -134,9 +134,9 @@ def actualizar_parcial(id_actualizar:str, nombre:Optional[str]=None, apellido:Op
         if correo:
             campos.append("correo = :correo")
             valores["correo"] = correo
-        if contrasenia:
+        if contrasenna:
             campos.append("contrasenna = :contrasenna")
-            valores["contrasenna"]= contrasenia
+            valores["contrasenna"]= contrasenna
         if direccion:
             campos.append("direccion = :direccion")
             valores["direccion"]= direccion
